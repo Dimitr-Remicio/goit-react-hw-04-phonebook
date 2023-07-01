@@ -66,34 +66,24 @@ export const App = () => {
     }
   };
 
-
-
   const handleFilterChange = (event) => {
-    setFilter({ filter: event.target.value });
+    setFilter(event.target.value);
   };
 
   const getFilteredContacts = () => {
-
-    let newArr = fArr.filter((cur) => cur.name.toUpperCase().includes(filter));
-    return newArr;
-
     const normalizedFilter = filter.toLowerCase();
     return contacts.filter((contact) =>
       contact.name.toLowerCase().includes(normalizedFilter)
     );
   };
 
-
-
-  const elementDelete = (contacts, id) => {
-    let updatedContacts = contacts.filter((contact) => contact.id !== id);
-    return updatedContacts;
-  };
-
   const deleteContact = (id) => {
-    let newArrAfterDel = elementDelete(contacts, id);
-    setContacts([...newArrAfterDel]);
+    const updatedContacts = contacts.filter((contact) => contact.id !== id);
+
+    setContacts(updatedContacts);
   };
+
+  const filteredContacts = getFilteredContacts();
 
 
     return (
