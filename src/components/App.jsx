@@ -1,16 +1,115 @@
+import { useEffect, useState, useRef } from 'react';
+
+import shortid from 'shortid';
+import style from './App.module.css';
+
+
+import Section from './Section/Section';
+
+import ContactForm from './ContactForm/ContactForm';
+import ContactList from './ContactList/ContactList';
+import Filter from './Filter/Filter';
+
+
+
+
 export const App = () => {
-  return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
-  );
-};
+
+  const [contacts, setContacts] = useState([
+    { id: shortid(), name: "Rosie Simpson", number: "459-12-56" },
+    { id: shortid(), name: "Hermione Kline", number: "443-89-12" },
+    { id: shortid(), name: "Eden Clements", number: "645-17-79" },
+    { id: shortid(), name: "Annie Copeland", number: "227-91-26" },
+  ]);
+  const [filter, setFilter] = useState("");
+  const isFirstRender = useRef(true);
+
+  // Este método se ejecuta después de que el componente se monta en el DOM.
+  useEffect(() => {
+    // Intentamos obtener los contactos almacenados en el local storage.
+    const storedContacts = localStorage.getItem("contacts");
+
+    if (storedContacts) {
+      // Si hay contactos almacenados, los parseamos y los establecemos en el estado de la aplicación.
+      const parsedContacts = JSON.parse(storedContacts);
+      if (parsedContacts.length) {
+        setContacts([...parsedContacts]);
+      }
+    }
+  }, []);
+
+  // Saving contacts to local storage
+  useEffect(() => {
+    if (!isFirstRender.current) {
+      window.localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+    isFirstRender.current = false;
+  }, [contacts]);
+
+
+  const formSubmitHandler = (data) => {
+    renderContact(data);
+  };
+
+  const renderContact = (data) => {
+    let nameArray = [];
+    nameArray = contacts.map((cur) => cur.name);
+    if (!nameArray.includes(data.name)) {
+      let arrayCont = [];
+      arrayCont = [
+        ...contacts,
+        { id: shortid(), name: data.name, number: data.number },
+      ];
+      return setContacts(arrayCont);
+    } else {
+      alert(`${data.name} is already in contacts`);
+    }
+  };
+
+
+
+  const handleFilterChange = (event) => {
+    setFilter({ filter: event.target.value });
+  };
+
+  const getFilteredContacts = () => {
+
+    let newArr = fArr.filter((cur) => cur.name.toUpperCase().includes(filter));
+    return newArr;
+
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter((contact) =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
+  };
+
+
+
+  const elementDelete = (contacts, id) => {
+    let updatedContacts = contacts.filter((contact) => contact.id !== id);
+    return updatedContacts;
+  };
+
+  const deleteContact = (id) => {
+    let newArrAfterDel = elementDelete(contacts, id);
+    setContacts([...newArrAfterDel]);
+  };
+
+
+    return (
+      <div className={style.container}>
+        <Section title="Directorio telefónico">
+          <ContactForm onSubmit={formSubmitHandler} />
+        </Section>
+
+        <Section title="Contactos">
+          <Filter value={filter} onChange={handleFilterChange} />
+          <div className={style.allContacts}>Contactos: {contacts.length}</div>
+          <ContactList
+            contacts={filteredContacts}
+            onDeleteContact={deleteContact}
+          />
+        </Section>
+      </div>
+    );
+  }
